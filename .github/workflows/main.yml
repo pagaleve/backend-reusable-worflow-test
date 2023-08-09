@@ -35,6 +35,9 @@ on:
         required: false
         default: 14.x
 
+permissions:
+  packages: write
+
 jobs:
   deploy:
     environment: ${{ inputs.environment }}
