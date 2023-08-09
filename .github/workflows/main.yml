@@ -137,7 +137,7 @@ jobs:
 #           rdme: openapi ./swagger-doc.json --key=${{secrets.README_API_KEY}} --id=${{secrets.README_API_DEFINITION_ID}}
       - name: Release
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
-        run: HUSKY=0 pnpm -r --workspace-concurrency=1 exec -- npx --no-install semantic-release -e semantic-release-monorepo
+          GH_TOKEN: ${{ secrets.PAT_PAGALEVESOURCE_PACKAGE_WRITE }}
+          NPM_TOKEN: ${{ secrets.PAT_PAGALEVESOURCE_PACKAGE_WRITE }}
+          NODE_AUTH_TOKEN: ${{secrets.PAT_PAGALEVESOURCE_PACKAGE_WRITE}}
+        run: pnpm run release
