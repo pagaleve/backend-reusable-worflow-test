@@ -139,6 +139,6 @@ jobs:
         if: ${{ inputs.environment == 'stage' && inputs.shouldRelease == true }}
         env:
           NPM_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.PAT_PAGALEVESOURCE_MANAGE_REPO }}
           NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
         run: pnpm run release
