@@ -34,13 +34,14 @@ on:
         description: nodejs version as default 14.x
         required: false
         default: 14.x
+      
+permissions:
+  packages: write
 
 jobs:
   deploy:
     environment: ${{ inputs.environment }}
     runs-on: ubuntu-latest
-    permissions:
-      packages: write
     env:
       STAGE: ${{ inputs.environment }}
       CONTEXT_ENV: ${{ inputs.context }}
