@@ -58,7 +58,6 @@ jobs:
       STAGE: ${{ inputs.environment }}
       CONTEXT_ENV: ${{ inputs.context }}
       NODE_VERSION: ${{ inputs.nodeVersion }}
-      GPR_AUTH_TOKEN: ${{ secrets.PAT_PAGALEVESOURCE_MANAGE_REPO }}
       SENTRY_DSN_URL: ${{ secrets.SENTRY_DSN_URL }}
       SENTRY_TRACES_SAMPLE_RATE: ${{ secrets.SENTRY_TRACES_SAMPLE_RATE }}
       KANASTRA_ORIGINATOR_ID: ${{ secrets.KANASTRA_ORIGINATOR_ID }}
