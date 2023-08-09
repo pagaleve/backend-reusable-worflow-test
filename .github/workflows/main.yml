@@ -43,7 +43,7 @@ jobs:
       STAGE: ${{ inputs.environment }}
       CONTEXT_ENV: ${{ inputs.context }}
       NODE_VERSION: ${{ inputs.nodeVersion }}
-      GPR_AUTH_TOKEN: ${{ secrets.PAT_PAGALEVESOURCE_PACKAGE_READ }}
+      GPR_AUTH_TOKEN: ${{ secrets.PAT_PAGALEVESOURCE_MANAGE_REPO }}
       SENTRY_DSN_URL: ${{ secrets.SENTRY_DSN_URL }}
       SENTRY_TRACES_SAMPLE_RATE: ${{ secrets.SENTRY_TRACES_SAMPLE_RATE }}
       KANASTRA_ORIGINATOR_ID: ${{ secrets.KANASTRA_ORIGINATOR_ID }}
@@ -56,10 +56,9 @@ jobs:
       ACCOUNT_ID: ${{ inputs.environment == 'prod' && secrets.PROD_ACCOUNT_ID || secrets.DEV_ACCOUNT_ID}}
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v2
         with:
-          token: ${{ secrets.PAT_PAGALEVESOURCE_PACKAGE_WRITE }}
-          fetch-depth: 0
+          persist-credentials: false
 
       - name: Use Node.js ${{ env.NODE_VERSION }}
         uses: actions/setup-node@v3
@@ -123,10 +122,16 @@ jobs:
         with:
           rdme: openapi ./swagger-doc.json --key=${{secrets.README_API_KEY}} --id=${{secrets.README_API_DEFINITION_ID}}
 
+      - name: Use Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          registry-url: https://npm.pkg.github.com/
+          scope: '@pagaleve'
       - name: Release
         if: ${{ inputs.environment == 'stage' && inputs.shouldRelease == true }}
         env:
           GH_TOKEN: ${{ secrets.PAT_PAGALEVESOURCE_MANAGE_REPO }}
           NPM_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
-        run: pnpm run release
+        run: pnpm run release --force
