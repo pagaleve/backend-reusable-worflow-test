@@ -34,9 +34,6 @@ on:
         description: nodejs version as default 14.x
         required: false
         default: 14.x
-      
-permissions:
-  packages: write
 
 jobs:
   deploy:
