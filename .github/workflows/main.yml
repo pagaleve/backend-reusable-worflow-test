@@ -1,4 +1,4 @@
-name: Reusable_Workflow
+name: backend_reusable_workflow_test
 
 on:
   workflow_call:
@@ -61,6 +61,7 @@ jobs:
       SENTRY_DSN_URL: ${{ secrets.SENTRY_DSN_URL }}
       SENTRY_TRACES_SAMPLE_RATE: ${{ secrets.SENTRY_TRACES_SAMPLE_RATE }}
       KANASTRA_ORIGINATOR_ID: ${{ secrets.KANASTRA_ORIGINATOR_ID }}
+      GPR_AUTH_TOKEN: ${{ secrets.PAT_PAGALEVESOURCE_PACKAGE_READ }}
       KANASTRA_URL: ${{ secrets.KANASTRA_URL }}
       KANASTRA_API_CLIENT_ID: ${{ secrets.KANASTRA_API_CLIENT_ID }}
       KANASTRA_API_CLIENT_SECRET: ${{ secrets.KANASTRA_API_CLIENT_SECRET }}
@@ -70,9 +71,10 @@ jobs:
       ACCOUNT_ID: ${{ inputs.environment == 'prod' && secrets.PROD_ACCOUNT_ID || secrets.DEV_ACCOUNT_ID}}
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
-          persist-credentials: false
+          token: ${{ secrets.PAT_PAGALEVESOURCE_PACKAGE_WRITE }}
+          fetch-depth: 0
 
       - name: Use Node.js ${{ env.NODE_VERSION }}
         uses: actions/setup-node@v3
@@ -82,7 +84,7 @@ jobs:
       - name: Authenticate with GitHub package registry
         run: |
           echo "@pagaleve:registry=https://npm.pkg.github.com" > ~/.npmrc
-          echo "//npm.pkg.github.com/:_authToken=${{ env.GITHUB_TOKEN }}" >> ~/.npmrc
+          echo "//npm.pkg.github.com/:_authToken=${{ env.GPR_AUTH_TOKEN }}" >> ~/.npmrc
           echo "registry=https://registry.npmjs.com" >> ~/.npmrc
       - name: Cache pnpm modules
         uses: actions/cache@v2
@@ -101,8 +103,8 @@ jobs:
       - name: Build
         run: pnpm run build
 
-#       - name: Unit Test ${{ inputs.environment }}
-#         run: pnpm run test:unit
+      - name: Unit Test ${{ inputs.environment }}
+        run: pnpm run test:unit
 
 #       - name: Generating coverage badges
 #         if: ${{ (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master') && inputs.environment == 'stage' && inputs.generateCoverageBadges == true }}
@@ -113,29 +115,31 @@ jobs:
 #         with:
 #           branches: main, master
 
-#       - name: Deploy ${{ inputs.environment }}
-#         run: pnpm run deploy -- ${{ inputs.environment }}
+      - name: Deploy ${{ inputs.environment }}
+        run: pnpm run deploy -- ${{ inputs.environment }}
 
-#       - name: Apply migrations ${{ inputs.environment }}
-#         if: ${{ inputs.applyMigration == true }}
-#         run: pnpm run migration -- ${{ inputs.environment }}
+      - name: Apply migrations ${{ inputs.environment }}
+        if: ${{ inputs.applyMigration == true }}
+        run: pnpm run migration -- ${{ inputs.environment }}
 
-#       - name: Integration Test
-#         if: ${{ inputs.environment != 'prod' }}
-#         run: pnpm run test:e2e
+      - name: Integration Test
+        if: ${{ inputs.environment != 'prod' }}
+        run: pnpm run test:e2e
 
-#       - name: Generate documentation
-#         if: ${{ inputs.updateReadme == true }}
-#         run: pnpm run gen-doc
-#         env:
-#           NPM_TOKEN: ${{ secrets.PAT_PAGALEVESOURCE_PACKAGE_WRITE }}
+      - name: Generate documentation
+        if: ${{ inputs.updateReadme == true }}
+        run: pnpm run gen-doc
+        env:
+          NPM_TOKEN: ${{ secrets.PAT_PAGALEVESOURCE_PACKAGE_WRITE }}
 
-#       - name: Update readme
-#         if: ${{ inputs.updateReadme == true }}
-#         uses: readmeio/rdme@7.0.1
-#         with:
-#           rdme: openapi ./swagger-doc.json --key=${{secrets.README_API_KEY}} --id=${{secrets.README_API_DEFINITION_ID}}
+      - name: Update readme
+        if: ${{ inputs.updateReadme == true }}
+        uses: readmeio/rdme@7.0.1
+        with:
+          rdme: openapi ./swagger-doc.json --key=${{secrets.README_API_KEY}} --id=${{secrets.README_API_DEFINITION_ID}}
+
       - name: Release
+        if: ${{ inputs.environment == 'stage' && inputs.shouldRelease == true }}
         env:
           GH_TOKEN: ${{ secrets.PAT_PAGALEVESOURCE_PACKAGE_WRITE }}
           NPM_TOKEN: ${{ secrets.PAT_PAGALEVESOURCE_PACKAGE_WRITE }}
