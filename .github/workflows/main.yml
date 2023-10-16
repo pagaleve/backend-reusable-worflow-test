@@ -148,6 +148,6 @@ jobs:
         if: ${{ inputs.environment == 'stage' && inputs.shouldRelease == true }}
         env:
           GH_TOKEN: ${{ secrets.PAT_PAGALEVESOURCE_PACKAGE_WRITE }}
-          NPM_TOKEN: ${{ secrets.PAT_PAGALEVESOURCE_PACKAGE_WRITE }}
-          NODE_AUTH_TOKEN: ${{secrets.PAT_PAGALEVESOURCE_PACKAGE_WRITE}}
+          NPM_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
         run: HUSKY=0 pnpm -r --workspace-concurrency=1 exec -- npx --no-install semantic-release -e semantic-release-monorepo
