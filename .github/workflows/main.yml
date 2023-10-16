@@ -122,11 +122,11 @@ jobs:
 #           branches: main, master
 
       - name: Deploy ${{ inputs.environment }}
-        run: pnpm run deploy -- ${{ inputs.environment }}
+        run: pnpm run deploy ${{ inputs.environment }}
 
       - name: Apply migrations ${{ inputs.environment }}
         if: ${{ inputs.applyMigration == true }}
-        run: pnpm run migration -- ${{ inputs.environment }}
+        run: pnpm run migration ${{ inputs.environment }}
 
       - name: Integration Test
         if: ${{ inputs.environment != 'prod' }}
@@ -150,4 +150,4 @@ jobs:
           GH_TOKEN: ${{ secrets.PAT_PAGALEVESOURCE_PACKAGE_WRITE }}
           NPM_TOKEN: ${{ secrets.PAT_PAGALEVESOURCE_PACKAGE_WRITE }}
           NODE_AUTH_TOKEN: ${{secrets.PAT_PAGALEVESOURCE_PACKAGE_WRITE}}
-        run: pnpm run release
+        run: HUSKY=0 pnpm -r --workspace-concurrency=1 exec -- npx --no-install semantic-release -e semantic-release-monorepo
