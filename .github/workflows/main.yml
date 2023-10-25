@@ -40,21 +40,6 @@ on:
         required: false
         default: 6.29.0
 
-permissions:
-  actions: write
-  checks: write
-  contents: write
-  deployments: write
-  id-token: write
-  issues: write
-  discussions: write
-  packages: write
-  pages: write
-  pull-requests: write
-  repository-projects: write
-  security-events: write
-  statuses: write
-
 jobs:
   deploy:
     environment: ${{ inputs.environment }}
@@ -66,11 +51,6 @@ jobs:
       PNPM_VERSION: ${{ inputs.pnpmVersion }}
       SENTRY_DSN_URL: ${{ secrets.SENTRY_DSN_URL }}
       SENTRY_TRACES_SAMPLE_RATE: ${{ secrets.SENTRY_TRACES_SAMPLE_RATE }}
-      KANASTRA_ORIGINATOR_ID: ${{ secrets.KANASTRA_ORIGINATOR_ID }}
-      GPR_AUTH_TOKEN: ${{ secrets.PAT_PAGALEVESOURCE_PACKAGE_READ }}
-      KANASTRA_URL: ${{ secrets.KANASTRA_URL }}
-      KANASTRA_API_CLIENT_ID: ${{ secrets.KANASTRA_API_CLIENT_ID }}
-      KANASTRA_API_CLIENT_SECRET: ${{ secrets.KANASTRA_API_CLIENT_SECRET }}
       AWS_REGION: ${{ inputs.environment == 'prod' && secrets.PROD_AWS_REGION || secrets.DEV_AWS_REGION }}
       AWS_ACCESS_KEY_ID: ${{ inputs.environment == 'prod' && secrets.PROD_AWS_ACCESS_KEY_ID || secrets.DEV_AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ inputs.environment == 'prod' && secrets.PROD_AWS_SECRET_ACCESS_KEY || secrets.DEV_AWS_SECRET_ACCESS_KEY}}
@@ -79,7 +59,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          token: ${{ secrets.PAT_PAGALEVESOURCE_PACKAGE_WRITE }}
+          token: ${{ secrets.PAT_WILL_TEMP_TEST }}
           fetch-depth: 0
 
       - name: Use Node.js ${{ env.NODE_VERSION }}
@@ -90,7 +70,7 @@ jobs:
       - name: Authenticate with GitHub package registry
         run: |
           echo "@pagaleve:registry=https://npm.pkg.github.com" > ~/.npmrc
-          echo "//npm.pkg.github.com/:_authToken=${{ env.GPR_AUTH_TOKEN }}" >> ~/.npmrc
+          echo "//npm.pkg.github.com/:_authToken=${{ secrets.PAT_WILL_TEMP_TEST }}" >> ~/.npmrc
           echo "registry=https://registry.npmjs.com" >> ~/.npmrc
       - name: Cache pnpm modules
         uses: actions/cache@v2
@@ -111,15 +91,6 @@ jobs:
 
       - name: Unit Test ${{ inputs.environment }}
         run: pnpm run test:unit
-
-#       - name: Generating coverage badges
-#         if: ${{ (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master') && inputs.environment == 'stage' && inputs.generateCoverageBadges == true }}
-#         uses: jpb06/jest-badges-action@latest
-#         env:
-#           HUSKY: 0
-#           tag: "--no-verify"
-#         with:
-#           branches: main, master
 
       - name: Deploy ${{ inputs.environment }}
         run: pnpm run deploy ${{ inputs.environment }}
@@ -147,7 +118,7 @@ jobs:
       - name: Release
         if: ${{ inputs.environment == 'stage' && inputs.shouldRelease == true }}
         env:
-          GH_TOKEN: ${{ secrets.PAT_PAGALEVESOURCE_PACKAGE_WRITE }}
-          NPM_TOKEN: ${{ secrets.PAT_PAGALEVESOURCE_PACKAGE_WRITE }}
-          NODE_AUTH_TOKEN: ${{secrets.PAT_PAGALEVESOURCE_PACKAGE_WRITE}}
-        run: HUSKY=0 pnpm -r --workspace-concurrency=1 exec -- npx --no-install semantic-release -e semantic-release-monorepo
+          GH_TOKEN: ${{ secrets.PAT_WILL_TEMP_TEST }}
+          NPM_TOKEN: ${{ secrets.PAT_WILL_TEMP_TEST }}
+          NODE_AUTH_TOKEN: ${{ secrets.PAT_WILL_TEMP_TEST }}
+        run: pnpm -r release
