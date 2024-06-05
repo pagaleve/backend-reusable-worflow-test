@@ -24,6 +24,11 @@ on:
         description: a boolean to determine if release step should be invoked
         required: false
         default: true
+      localDynamo:
+        type: boolean
+        description: a boolean to determine if should instance a local dynamo
+        required: false
+        default: false
       generateCoverageBadges:
         type: boolean
         description: a boolean to determine if generate coverage badges should be invoked
@@ -109,6 +114,15 @@ jobs:
       - name: Build
         run: pnpm run build
 
+      - name: Local Dynamo Start
+        if: ${{ inputs.environment != 'prod' && inputs.localDynamo == true }}
+        run: pnpm run local-dynamo-run
+
+
+      - name: Local Dynamo Migrate
+        if: ${{ inputs.environment != 'prod' && inputs.localDynamo == true }}
+        run: pnpm run dynamo-migrate
+        
       - name: Unit Test ${{ inputs.environment }}
         run: pnpm run test:unit
 
