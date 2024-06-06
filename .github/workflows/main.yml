@@ -115,12 +115,12 @@ jobs:
         run: pnpm run build
 
       - name: Local Dynamo Start
-        if: ${{ inputs.environment != 'prod' && inputs.localDynamo == true }}
+        if: ${{ inputs.localDynamo == true }}
         run: pnpm run local-dynamo-run ${{ inputs.environment }}
 
 
       - name: Local Dynamo Migrate
-        if: ${{ inputs.environment != 'prod' && inputs.localDynamo == true }}
+        if: ${{ inputs.localDynamo == true }}
         run: pnpm run dynamo-migrate ${{ inputs.environment }}
 
       - name: Unit Test ${{ inputs.environment }}
