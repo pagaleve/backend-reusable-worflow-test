@@ -44,6 +44,16 @@ on:
         description: pnpm version as default 6.29.0
         required: false
         default: 6.29.0
+      autoInstallPeers:
+        type: boolean
+        description: a boolean to determine if should install peer dependencies automatically
+        required: false
+        default: true
+      installCommand:
+        type: string
+        description: the command to install dependencies
+        required: false
+        default: "pnpm install --frozen-lockfile"
 
 permissions:
   actions: write
@@ -97,6 +107,7 @@ jobs:
           echo "@pagaleve:registry=https://npm.pkg.github.com" > ~/.npmrc
           echo "//npm.pkg.github.com/:_authToken=${{ env.GPR_AUTH_TOKEN }}" >> ~/.npmrc
           echo "registry=https://registry.npmjs.com" >> ~/.npmrc
+          echo "auto-install-peers=${{ inputs.autoInstallPeers }}" >> ~/.npmrc
       - name: Cache pnpm modules
         uses: actions/cache@v2
         with:
@@ -109,7 +120,7 @@ jobs:
           version: ${{ env.PNPM_VERSION }}
 
       - name: Install NPM Dependencies
-        run: pnpm install --frozen-lockfile
+        run: ${{ inputs.installCommand }}
 
       - name: Build
         run: pnpm run build
