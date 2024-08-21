@@ -129,7 +129,7 @@ jobs:
 
       - name: Install Layer Dependencies
         if: ${{ inputs.installLayer == true }}
-        run: make build-layer 
+        run: pnpm run install:lambda-layer
         
       - name: Build
         run: pnpm run build
