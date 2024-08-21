@@ -54,6 +54,11 @@ on:
         description: the command to install dependencies
         required: false
         default: "pnpm install --frozen-lockfile"
+      installLayer:
+        type: boolean
+        description: a boolean to determine if should install lambda layer with npm
+        required: false
+        default: false
 
 permissions:
   actions: write
@@ -122,13 +127,16 @@ jobs:
       - name: Install NPM Dependencies
         run: ${{ inputs.installCommand }}
 
+      - name: Install Layer Dependencies
+        if: ${{ inputs.installLayer == true }}
+        run: make build-layer 
+        
       - name: Build
         run: pnpm run build
 
       - name: Local Dynamo Start
         if: ${{ inputs.localDynamo == true }}
         run: pnpm run local-dynamo-run ${{ inputs.environment }}
-
 
       - name: Local Dynamo Migrate
         if: ${{ inputs.localDynamo == true }}
