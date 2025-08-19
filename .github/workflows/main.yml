@@ -53,10 +53,15 @@ on:
         type: string
         description: the command to install dependencies
         required: false
-        default: "pnpm install --frozen-lockfile"
+        default: 'pnpm install --frozen-lockfile'
       installLayer:
         type: boolean
         description: a boolean to determine if should install lambda layer with npm
+        required: false
+        default: false
+      enablePrePostScripts:
+        type: boolean
+        description: a boolean to determine if enable pre post scripts should be invoked
         required: false
         default: false
 
@@ -113,6 +118,7 @@ jobs:
           echo "//npm.pkg.github.com/:_authToken=${{ env.GPR_AUTH_TOKEN }}" >> ~/.npmrc
           echo "registry=https://registry.npmjs.com" >> ~/.npmrc
           echo "auto-install-peers=${{ inputs.autoInstallPeers }}" >> ~/.npmrc
+          echo "enable-pre-post-scripts=${{ inputs.enablePrePostScripts }}" >> ~/.npmrc
       - name: Cache pnpm modules
         uses: actions/cache@v4
         with:
@@ -130,7 +136,7 @@ jobs:
       - name: Install Layer Dependencies
         if: ${{ inputs.installLayer == true }}
         run: pnpm run install:lambda-layer
-        
+
       - name: Build
         run: pnpm run build
 
@@ -145,14 +151,14 @@ jobs:
       - name: Unit Test ${{ inputs.environment }}
         run: pnpm run test:unit
 
-#       - name: Generating coverage badges
-#         if: ${{ (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master') && inputs.environment == 'stage' && inputs.generateCoverageBadges == true }}
-#         uses: jpb06/jest-badges-action@latest
-#         env:
-#           HUSKY: 0
-#           tag: "--no-verify"
-#         with:
-#           branches: main, master
+      #       - name: Generating coverage badges
+      #         if: ${{ (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master') && inputs.environment == 'stage' && inputs.generateCoverageBadges == true }}
+      #         uses: jpb06/jest-badges-action@latest
+      #         env:
+      #           HUSKY: 0
+      #           tag: "--no-verify"
+      #         with:
+      #           branches: main, master
 
       - name: Deploy ${{ inputs.environment }}
         run: pnpm run deploy ${{ inputs.environment }}
