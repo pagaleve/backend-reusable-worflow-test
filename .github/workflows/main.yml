@@ -64,6 +64,11 @@ on:
         description: a boolean to determine if enable pre post scripts should be invoked
         required: false
         default: false
+      useOidc:
+        type: boolean
+        description: a boolean to determine if OIDC should be used to configure AWS credentials instead of static keys
+        required: false
+        default: false
 
 permissions:
   actions: write
@@ -100,6 +105,7 @@ jobs:
       AWS_ACCESS_KEY_ID: ${{ inputs.environment == 'prod' && secrets.PROD_AWS_ACCESS_KEY_ID || secrets.DEV_AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ inputs.environment == 'prod' && secrets.PROD_AWS_SECRET_ACCESS_KEY || secrets.DEV_AWS_SECRET_ACCESS_KEY}}
       ACCOUNT_ID: ${{ inputs.environment == 'prod' && secrets.PROD_ACCOUNT_ID || secrets.DEV_ACCOUNT_ID}}
+      AWS_ROLE_ARN: ${{ inputs.environment == 'prod' && secrets.AWS_ROLE_ARN_PRODUCTION || secrets.AWS_ROLE_ARN_SANDBOX }}
 
     steps:
       - uses: actions/checkout@v3
@@ -159,6 +165,14 @@ jobs:
       #           tag: "--no-verify"
       #         with:
       #           branches: main, master
+
+      - name: Configure AWS credentials
+        if: ${{ inputs.useOidc == true }}
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.AWS_ROLE_ARN }}
+          role-session-name: GitHubActions-${{ github.event.repository.name }}-${{ inputs.environment }}
+          aws-region: ${{ env.AWS_REGION }}
 
       - name: Deploy ${{ inputs.environment }}
         run: pnpm run deploy ${{ inputs.environment }}
